@@ -17,7 +17,6 @@
 <c:forEach items="${meals}" var="meal">
     <jsp:useBean id="meal" scope="page" type="ru.javawebinar.topjava.model.MealWithExceed"/>
     <tr class="${meal.exceed ? 'exceeded':'normal'}">
-        <%--<c:set var="date" scope="session" value="${meal.dateTime.toString()}"/>--%>
         <td> ${fn:formatDateTime(meal.dateTime)}</td>
         <td>${meal.description}</td>
         <td>${meal.calories}</td>
