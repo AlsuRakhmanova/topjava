@@ -16,11 +16,13 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public Meal save(Meal meal) {
-        return null;
+        return repository.save(meal);
+
     }
 
     @Override
     public void delete(int id) throws NotFoundException {
+        repository.delete(id);
 
     }
 
@@ -31,7 +33,7 @@ public class MealServiceImpl implements MealService {
 
     @Override
     public void update(Meal meal) {
-
+        repository.save(meal);
     }
 
     @Override
