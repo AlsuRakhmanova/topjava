@@ -3,6 +3,8 @@ package ru.javawebinar.topjava.web;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.model.Meal;
@@ -20,16 +22,27 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
+
 public class MealServlet extends HttpServlet {
+
+    private ConfigurableApplicationContext springContext;
+
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
 
 
-    private MealRestController meals;
+    private MealRestController mealController;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        meals = new MealRestController();
+        springContext = new ClassPathXmlApplicationContext("spring/spring-app.xml");
+        mealController = springContext.getBean(MealRestController.class);
+    }
+
+    @Override
+    public void destroy() {
+        springContext.close();
+        super.destroy();
     }
 
     @Override
@@ -43,7 +56,7 @@ public class MealServlet extends HttpServlet {
                 Integer.valueOf(request.getParameter("calories")));
 
         log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
-        meals.save(meal);
+        mealController.save(meal);
         response.sendRedirect("meals");
     }
 
@@ -55,14 +68,14 @@ public class MealServlet extends HttpServlet {
             case "delete":
                 int id = getId(request);
                 log.info("Delete {}", id);
-                meals.delete(id);
+                mealController.delete(id);
                 response.sendRedirect("meals");
                 break;
             case "create":
             case "update":
                 final Meal meal = "create".equals(action) ?
                         new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
-                        meals.get(getId(request), AuthorizedUser.id());
+                        mealController.get(getId(request), AuthorizedUser.id());
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/meal.jsp").forward(request, response);
                 break;
@@ -70,8 +83,8 @@ public class MealServlet extends HttpServlet {
             default:
                 log.info("getAll");
                 request.setAttribute("meals",
-                        meals.getAll(AuthorizedUser.id()));
-                        //MealsUtil.getWithExceeded(meals.getAll(), MealsUtil.DEFAULT_CALORIES_PER_DAY));
+                        mealController.getAll(AuthorizedUser.id()));
+                //MealsUtil.getWithExceeded(meals.getAll(), MealsUtil.DEFAULT_CALORIES_PER_DAY));
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
         }
@@ -82,8 +95,5 @@ public class MealServlet extends HttpServlet {
         return Integer.valueOf(paramId);
     }
 
-    @Override
-    public void destroy() {
-        super.destroy();
-    }
+
 }
