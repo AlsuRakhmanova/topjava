@@ -45,12 +45,12 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     @Override
     public List<User> getAll() {
         log.info("getAll");
-        return (List<User>)repository.values();
+        return repository.values().stream().sorted().collect(Collectors.toList());
     }
 
     @Override
     public User getByEmail(String email) {
         log.info("getByEmail {}", email);
-        return repository.values().stream().filter(user->user.getEmail().equals(email)).reduce();
+        return repository.values().stream().filter(user->user.getEmail().equals(email)).findFirst().orElse(null);
     }
 }
