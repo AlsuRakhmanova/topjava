@@ -10,7 +10,7 @@ public interface MealService {
 
     void delete(int id) throws NotFoundException;
 
-    Meal get(int id) throws NotFoundException;
+    Meal get(int id, int userId) throws NotFoundException;
 
     void update(Meal meal);
 
