@@ -2,14 +2,10 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.stereotype.Component;
 import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.repository.mock.InMemoryMealRepositoryImpl;
-import ru.javawebinar.topjava.util.MealsUtil;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import javax.servlet.ServletConfig;
@@ -19,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -48,20 +45,36 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        String id = request.getParameter("id");
+        String action = request.getParameter("action");
+        switch (action == null ? "all" : action) {
+            case "filter":
+                LocalTime startTime = getStartTime(request);
+                LocalTime endTime = getEndTime(request);
+//                request.setAttribute("meals",
+//                        mealController.getAll(AuthorizedUser.id()));
+                request.setAttribute("meals", mealController.getBetween(AuthorizedUser.id(), startTime, endTime));
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                break;
+            case "all":
+            default:
+                String id = request.getParameter("id");
+                Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
+                        LocalDateTime.parse(request.getParameter("dateTime")),
+                        request.getParameter("description"),
+                        Integer.valueOf(request.getParameter("calories")));
 
-        Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
-                LocalDateTime.parse(request.getParameter("dateTime")),
-                request.getParameter("description"),
-                Integer.valueOf(request.getParameter("calories")));
+                log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
+                mealController.save(meal);
+                response.sendRedirect("meals");
+                break;
 
-        log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
-        mealController.save(meal);
-        response.sendRedirect("meals");
+        }
+
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws
+            ServletException, IOException {
         String action = request.getParameter("action");
 
         switch (action == null ? "all" : action) {
@@ -79,6 +92,7 @@ public class MealServlet extends HttpServlet {
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/meal.jsp").forward(request, response);
                 break;
+
             case "all":
             default:
                 log.info("getAll");
@@ -95,5 +109,14 @@ public class MealServlet extends HttpServlet {
         return Integer.valueOf(paramId);
     }
 
+    private LocalTime getStartTime(HttpServletRequest request) {
+        String paramTime = Objects.requireNonNull(request.getParameter("startTime"));
+        return LocalTime.parse(paramTime);
+    }
+
+    private LocalTime getEndTime(HttpServletRequest request) {
+        String paramTime = Objects.requireNonNull(request.getParameter("endTime"));
+        return LocalTime.parse(paramTime);
+    }
 
 }

@@ -48,5 +48,8 @@ public class MealRestController {
         return service.get(id, userId);
     }
 
-
+    public List<MealWithExceed> getBetween(int userId, LocalTime startTime, LocalTime endTime) {
+        log.info("getAll {}");
+        return getFilteredWithExceededInOneReturn(service.getAll(userId), startTime, endTime, AuthorizedUser.getCaloriesPerDay());
+    }
 }
