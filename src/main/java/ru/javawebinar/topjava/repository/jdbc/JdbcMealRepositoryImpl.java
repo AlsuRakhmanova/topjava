@@ -8,8 +8,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.CustomRowMapper;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
@@ -20,6 +20,7 @@ public class JdbcMealRepositoryImpl implements MealRepository {
 
     private static final BeanPropertyRowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
 
+    //private static final CustomRowMapper ROW_MAPPER = new CustomRowMapper();
     private final JdbcTemplate jdbcTemplate;
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -40,31 +41,31 @@ public class JdbcMealRepositoryImpl implements MealRepository {
     public Meal save(Meal meal, int userId)
     {    MapSqlParameterSource map = new MapSqlParameterSource()
             .addValue("id", meal.getId())
-            .addValue("time", meal.getDateTime())
+            .addValue("date_time", meal.getDateTime())
             .addValue("description", meal.getDescription())
             .addValue("calories", meal.getCalories())
-            .addValue("userid", userId);
+            .addValue("user_id", userId);
 
         if (meal.isNew()) {
         Number newKey = insertMeal.executeAndReturnKey(map);
         meal.setId(newKey.intValue());
     } else {
         namedParameterJdbcTemplate.update(
-                "UPDATE meals SET time=:time, description=:description, calories=:calories" +
-                        " WHERE id=:id AND userid=:userid", map);
+                "UPDATE meals SET time=:date_time, description=:description, calories=:calories" +
+                        " WHERE id=:id AND userid=:user_id", map);
     }
         return meal;
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        return jdbcTemplate.update("DELETE FROM meals WHERE id=? AND userid=?", id,userId) != 0;
+        return jdbcTemplate.update("DELETE FROM meals WHERE id=? AND user_id=?", id,userId) != 0;
     }
 
     @Override
     public Meal get(int id, int userId) {
 
-        List<Meal> meals = jdbcTemplate.query("SELECT * FROM meals WHERE id=? AND userid=?", ROW_MAPPER, id, userId);
+        List<Meal> meals = jdbcTemplate.query("SELECT * FROM meals WHERE id=? AND user_id=?", ROW_MAPPER, id, userId);
         return DataAccessUtils.singleResult(meals);
     }
 
@@ -72,11 +73,11 @@ public class JdbcMealRepositoryImpl implements MealRepository {
     public List<Meal> getAll(int userId) {
 
         //return jdbcTemplate.queryForObject("SELECT * FROM meals WHERE userid=?", ROW_MAPPER, userId);
-        return jdbcTemplate.query("SELECT * FROM meals WHERE userid=? ORDER BY time DESC", ROW_MAPPER, userId);
+        return jdbcTemplate.query("SELECT * FROM meals WHERE user_id=? ORDER BY date_time DESC", ROW_MAPPER, userId);
     }
 
     @Override
     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
-        return jdbcTemplate.query("SELECT * FROM meals WHERE userid=? AND time BETWEEN ? AND ? ORDER BY time, description", ROW_MAPPER, userId, startDate, endDate);
+        return jdbcTemplate.query("SELECT * FROM meals WHERE user_id=? AND date_time BETWEEN ? AND ? ORDER BY time, description", ROW_MAPPER, userId, startDate, endDate);
     }
 }

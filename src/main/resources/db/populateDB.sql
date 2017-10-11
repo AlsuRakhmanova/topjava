@@ -12,6 +12,6 @@ VALUES ('Admin', 'admin@gmail.com', 'admin');
 INSERT INTO user_roles (role, user_id) VALUES
   ('ROLE_USER', 100000),
   ('ROLE_ADMIN', 100001);
-INSERT INTO meals (description,calories, userid) VALUES
-  ('dinner', 500,100000),
-  ('beakfast', 300,100001);
+INSERT INTO meals (date_time, description,calories, user_id) VALUES
+  (timestamp '2015-06-01 14:00','user lunch', 510,100000);
+--   ('beakfast', 300,100001);
