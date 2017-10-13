@@ -3,6 +3,8 @@ DROP TABLE IF EXISTS meals;
 DROP TABLE IF EXISTS users;
 DROP SEQUENCE IF EXISTS global_seq;
 
+-- SET enable_seqscan = OFF;
+
 CREATE SEQUENCE global_seq START 100000;
 
 CREATE TABLE users
@@ -34,3 +36,4 @@ CREATE TABLE meals
   CONSTRAINT user_id
   FOREIGN KEY (user_id) REFERENCES users (id) on DELETE CASCADE
 );
+CREATE UNIQUE INDEX meals_unique_user_datetime_idx ON meals (user_id, date_time);
