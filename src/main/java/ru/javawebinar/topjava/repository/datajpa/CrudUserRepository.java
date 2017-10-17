@@ -6,9 +6,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.User;
 
 import java.util.List;
+import java.util.Map;
 
 @Transactional(readOnly = true)
 public interface CrudUserRepository extends JpaRepository<User, Integer> {
@@ -29,4 +31,10 @@ public interface CrudUserRepository extends JpaRepository<User, Integer> {
     List<User> findAll(Sort sort);
 
     User getByEmail(String email);
+
+    User getById(Integer id);
+
+    @Query("SELECT u, m FROM User u, Meal m WHERE u.id=:id" )
+    Map<User,List<Meal>> getWithMeal(@Param("id") int id);
+
 }

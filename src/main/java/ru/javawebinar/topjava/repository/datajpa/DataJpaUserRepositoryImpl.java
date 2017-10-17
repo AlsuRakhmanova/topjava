@@ -3,10 +3,12 @@ package ru.javawebinar.topjava.repository.datajpa;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class DataJpaUserRepositoryImpl implements UserRepository {
@@ -39,4 +41,9 @@ public class DataJpaUserRepositoryImpl implements UserRepository {
     public List<User> getAll() {
         return crudRepository.findAll(SORT_NAME_EMAIL);
     }
+
+    public Map<User, List<Meal>> getWithMeal(int id) {
+        return crudRepository.getWithMeal(id);
+    }
+
 }

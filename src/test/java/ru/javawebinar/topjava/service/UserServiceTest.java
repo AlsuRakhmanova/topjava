@@ -12,15 +12,15 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.ActiveDbProfileResolver;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.datajpa.DataJpaMealRepositoryImpl;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
+import static ru.javawebinar.topjava.MealTestData.MATCHER;
 import static ru.javawebinar.topjava.Profiles.DATAJPA;
 import static ru.javawebinar.topjava.UserTestData.*;
 
@@ -42,6 +42,7 @@ public class UserServiceTest {
 
     @Autowired
     private UserService service;
+
 
     @Before
     public void setUp() throws Exception {
@@ -93,6 +94,13 @@ public class UserServiceTest {
     public void testGetAll() throws Exception {
         Collection<User> all = service.getAll();
         MATCHER.assertCollectionEquals(Arrays.asList(ADMIN, USER), all);
+    }
+
+    @Test
+    public void testGetWithMeal() throws Exception {
+        Map<User, List<Meal>> withMeal = service.getWithMeal(USER_ID);
+//        MATCHER.assertCollectionEquals(Arrays.asList(ADMIN, USER), all);
+        MATCHER.assertCollectionEquals(MEALS, service.getAll(USER_ID));
     }
 
     @Test

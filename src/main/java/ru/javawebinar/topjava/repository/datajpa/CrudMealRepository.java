@@ -36,4 +36,5 @@ public interface CrudMealRepository extends JpaRepository<Meal, Integer> {
 
     @Override
     Meal findOne(Integer id);
+
 }

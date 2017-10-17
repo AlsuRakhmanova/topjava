@@ -5,11 +5,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.util.List;
+import java.util.Map;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFound;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
@@ -52,6 +54,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAll() {
         return repository.getAll();
+    }
+
+    @Override
+    public Map<User, List<Meal>> getWithMeal(int id) {
+        return repository.getWithMeal(id);
     }
 
     @CacheEvict(value = "users", allEntries = true)
