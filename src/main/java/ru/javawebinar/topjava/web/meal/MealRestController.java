@@ -4,6 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
@@ -11,15 +14,20 @@ import ru.javawebinar.topjava.to.MealWithExceed;
 import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
+import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
 import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 
 @Controller
-public class MealRestController {
+public class MealRestController extends AbstractMealController{
     private static final Logger log = LoggerFactory.getLogger(MealRestController.class);
 
     private final MealService service;
@@ -41,25 +49,55 @@ public class MealRestController {
         service.delete(id, userId);
     }
 
-    public List<MealWithExceed> getAll() {
-        int userId = AuthorizedUser.id();
-        log.info("getAll for userId={}", userId);
-        return MealsUtil.getWithExceeded(service.getAll(userId), AuthorizedUser.getCaloriesPerDay());
+    @RequestMapping(value = "/meals", method = RequestMethod.GET)
+    public String meals(Model model) {
+        model.addAttribute("meals", super.getAll());
+        return "meals";
     }
 
-    public Meal create(Meal meal) {
-        int userId = AuthorizedUser.id();
-        log.info("create {} for userId={}", meal, userId);
-        checkNew(meal);
-        return service.create(meal, userId);
+    @RequestMapping(value = "/meals/delete", method = RequestMethod.GET)
+    public String delete(HttpServletRequest request) {
+        super.delete(Integer.valueOf(request.getParameter("id")));
+        return "redirect:/meals";
+    }
+    @RequestMapping(value = "/meals/update", method = RequestMethod.GET)
+    public String update(HttpServletRequest request, Model model) {
+        model.addAttribute("meal", super.get(Integer.valueOf(request.getParameter("id"))));
+        return "mealForm";
+    }
+    @RequestMapping(value = "/meals/create", method = RequestMethod.GET)
+    public String create(Model model) {
+        model.addAttribute("meal", new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000));
+        return "mealForm";
+    }
+    @RequestMapping(value = "/meals", method = RequestMethod.POST)
+    public String save(HttpServletRequest request) {
+        String id = request.getParameter("id");
+        Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
+                LocalDateTime.parse(request.getParameter("dateTime")),
+                request.getParameter("description"),
+                Integer.parseInt(request.getParameter("calories")));
+        if (meal.isNew()) {
+            service.create(meal, AuthorizedUser.id());
+        } else {
+            service.update(meal, AuthorizedUser.id());
+        }
+        return "redirect:/meals";
+    }
+    @RequestMapping(value = "/meals/filter", method = RequestMethod.POST)
+    public String filter(HttpServletRequest request, Model model) {
+        LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
+        LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
+        LocalTime startTime = parseLocalTime(request.getParameter("startTime"));
+        LocalTime endTime = parseLocalTime(request.getParameter("endTime"));
+//        request.setAttribute("meals", super.getBetween(startDate, startTime, endDate, endTime));
+//        return "redirect:/meals";
+        model.addAttribute("meals", super.getBetween(startDate, startTime, endDate, endTime));
+        return "meals";
     }
 
-    public void update(Meal meal, int id) {
-        int userId = AuthorizedUser.id();
-        log.info("update {} with id={} for userId={}", meal, id, userId);
-        assureIdConsistent(meal, id);
-        service.update(meal, userId);
-    }
+
+
 
     /**
      * <ol>Filter separately
