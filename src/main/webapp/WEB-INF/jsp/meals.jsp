@@ -11,7 +11,7 @@
 <body>
 <section>
     <h3>Meals</h3>
-    <form method="post" action="meals/filter">
+    <form method="post" action="${pageContext.request.contextPath}/meals/filter">
         <dl>
             <dt>From Date:</dt>
             <dd><input type="date" name="startDate" value="${param.startDate}"></dd>
