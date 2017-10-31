@@ -42,6 +42,7 @@ public class BeanMatcher<T> {
                 (T expected, T actual) -> expected == actual || String.valueOf(expected).equals(String.valueOf(actual)));
     }
 
+
     public static <T> BeanMatcher<T> of(Class<T> entityClass, Equality<T> equality) {
         return new BeanMatcher<>(entityClass, equality);
     }
