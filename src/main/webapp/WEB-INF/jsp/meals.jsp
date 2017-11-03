@@ -99,7 +99,7 @@
                                 code="meal.description"/></label>
 
                         <div class="col-xs-9">
-                            <input type="description" class="form-control" id="description" name="description"
+                            <input type="text" class="form-control" id="description" name="description"
                                    placeholder="<spring:message code="meal.description"/>">
                         </div>
                     </div>
@@ -109,7 +109,7 @@
                                 code="meal.calories"/></label>
 
                         <div class="col-xs-9">
-                            <input type="calories" class="form-control" id="calories" name="calories"
+                            <input type="text" class="form-control" id="calories" name="calories"
                                    placeholder="<spring:message code="meal.calories"/>">
                         </div>
                     </div>
