@@ -10,6 +10,8 @@ import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.javawebinar.topjava.util.UserUtil.DEFAULT_CALORIES_PER_DAY;
+
 public class MealsUtil {
     public static final List<Meal> MEALS= Arrays.asList(
             new Meal(LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500),
@@ -19,8 +21,7 @@ public class MealsUtil {
             new Meal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500),
             new Meal(LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510)
             );
-    public static final int DEFAULT_CALORIES_PER_DAY = 2000;
-
+    
     private MealsUtil() {
     }
 
